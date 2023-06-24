@@ -1,16 +1,13 @@
 const express = require("express")
-const controller = require('../tripsController')
-
-// controllers
-
+const tripsController = require('../controllers/tripsController')
 
 const router = express.Router()
 
 // Routes
 router
-    .get("/", controller.testing)
-    .get("/trips", controller.get)
-    .post("/trips", controller.store)
+    .get("/", tripsController.testing)
+    .get("/trips", tripsController.get)
+    .post("/trips", tripsController.store)
 
 
 module.exports = router

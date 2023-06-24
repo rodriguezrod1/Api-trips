@@ -13,22 +13,15 @@ const TripSchema = new mongoose.Schema({
         lon: Number,
         address: String,
     },
-    duration: Number,
     distance: Number,
+    duration: Number,
     overspeedsCount: Number,
     boundingBox: {
         minLat: Number,
         maxLat: Number,
         minLon: Number,
         maxLon: Number,
-    },
-    readings: [{
-        time: Number,
-        lat: Number,
-        lon: Number,
-        speed: Number,
-        speedLimit: Number,
-    }, ],
+    }
 });
 
 module.exports = mongoose.model('Trip', TripSchema);
