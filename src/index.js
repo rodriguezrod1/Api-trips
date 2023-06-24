@@ -1,17 +1,16 @@
 
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const express = require('express')
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+const routes = require("./routes/api")
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const mongoString = process.env.DATABASE_URL;
 
-app.use(express.json());
 
-mongoose.connect(mongoString);
+/*mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 const database = mongoose.connection;
 
 database.on('error', (error) => {
@@ -20,8 +19,11 @@ database.on('error', (error) => {
 
 database.once('connected', () => {
     console.log('Database Connected');
-})
+})*/
 
+
+app.use(express.json())
+app.use("/api", routes)
 
 
 app.listen(PORT, () => {
