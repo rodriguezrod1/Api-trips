@@ -1,4 +1,4 @@
-const request  = require('supertest')
+const request = require('supertest')
 const { app } = require("../index")
 const { Trip } = require('../models/Trip')
 
@@ -97,30 +97,30 @@ const testReadings = [{
 ];
 
 
-/*beforeEach(async() => {
-    await Trip.deleteMany();
-});*/
 
+describe('Pruebas sobre la API de Trips', () => {
 
-describe('POST /api/trips', () => {
-    test('Debe crear y guardar un nuevo viaje', async() => {
-        const response = await request(app)
-            .post('/api/trips')
-            .send({ readings: testReadings });
+    describe('POST /api/trips', () => {
+        test('Debe crear y guardar un nuevo viaje', async() => {
+            const response = await request(app)
+                .post('/api/trips')
+                .send({ readings: testReadings });
 
-        expect(response.status).toBe(201);
+            expect(response.status).toBe(201);
 
-        const trip = await Trip.findById(response.body._id);
-        expect(trip).toBeDefined();
-        expect(trip.readings.length).toBe(testReadings.length);
+            const trip = await Trip.findById(response.body._id);
+            expect(trip).toBeDefined();
+            expect(trip.readings.length).toBe(testReadings.length);
+        });
     });
-});
 
 
-describe('GET /api/trips', () => {
-    test('Debe devolver una lista de viajes', async() => {
-        const response = await request(app).get('/api/trips').send();
-        expect(response.status).toBe(200);
-        expect(response.body.length).toBe(0);
+    describe('GET /api/trips', () => {
+        test('Debe devolver una lista de viajes', async() => {
+            const response = await request(app).get('/api/trips').send();
+            expect(response.status).toBe(200);
+            expect(response.body.length).toBe(0);
+        });
     });
-});
+
+})
