@@ -2,7 +2,7 @@ const Trip = require('../models/Trip')
 const { getAddress } = require('../utils/geocode')
 const { calculateBoundingBox } = require("../utils/boundingBox")
 const { calculateOverspeedsCount } = require("../utils/overSpeeds")
-//const { calculateDistance } = require("../utils/distance")
+    //const { calculateDistance } = require("../utils/distance")
 
 
 function testing(req, res) {
@@ -33,10 +33,10 @@ const get = async(req, res) => {
 }
 
 
+
+
 const store = async(req, res) => {
-
     try {
-
         const { readings } = req.body;
 
         if (readings.length < 5) {
@@ -69,7 +69,7 @@ const store = async(req, res) => {
             const prevReading = readings[index - 1];
             const timeDiff = reading.time - prevReading.time;
             const speed = prevReading.speed;
-            const distance = speed * timeDiff / 3600; // Convert from seconds to hours
+            const distance = (speed * timeDiff) / 3600; // Convert from seconds to hours
             return total + distance;
         }, 0);
 
@@ -81,28 +81,28 @@ const store = async(req, res) => {
                 time: startReading.time,
                 lat: startLat,
                 lon: startLon,
-                address: startAddress
+                address: startAddress,
             },
             end: {
                 time: endReading.time,
                 lat: endLat,
                 lon: endLon,
-                address: endAddress
+                address: endAddress,
             },
             duration,
             distance,
             overspeedsCount,
-            boundingBox
+            boundingBox,
         });
 
         await trip.save();
-        res.status(201).json(trip);
-
+        return res.status(201).json(trip);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error.' });
+        return res.status(500).json({ message: err.message });
     }
-}
+};
+
 
 
 module.exports = {get, store, testing }
