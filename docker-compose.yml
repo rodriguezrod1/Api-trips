@@ -9,11 +9,11 @@ services:
       - '.:/app'
     restart: unless-stopped
     environment: 
-      - PORT=3001
-      - MONGO_URI=mongodb://mongo:27017/trips
-    depends_on:
-      - mongo
-  mongodb:
-    image: mongo
-    ports:
-      - 27017:27017
+     - PORT=3001
+     - MONGO_URI=mongodb+srv://rod-trips:4iDPA97TSTcUX52m@cluster0.yrffebo.mongodb.net/
+    #depends_on:
+     # - mongo
+  #mongodb:
+   # image: mongo
+   # ports:
+    #  - 27018:27018
