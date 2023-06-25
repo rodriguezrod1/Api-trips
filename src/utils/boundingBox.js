@@ -5,10 +5,10 @@
          maxLon = -Infinity;
 
      readings.forEach(reading => {
-         minLat = Math.min(minLat, reading.lat);
-         minLon = Math.min(minLon, reading.lon);
-         maxLat = Math.max(maxLat, reading.lat);
-         maxLon = Math.max(maxLon, reading.lon);
+         minLat = Math.min(minLat, reading.location.lat);
+         minLon = Math.min(minLon, reading.location.lon);
+         maxLat = Math.max(maxLat, reading.location.lat);
+         maxLon = Math.max(maxLon, reading.location.lon);
      });
 
      return { minLat, minLon, maxLat, maxLon };

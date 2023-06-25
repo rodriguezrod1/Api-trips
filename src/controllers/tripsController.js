@@ -2,7 +2,7 @@ const Trip = require('../models/Trip')
 const { getAddress } = require('../utils/geocode')
 const { calculateBoundingBox } = require("../utils/boundingBox")
 const { calculateOverspeedsCount } = require("../utils/overSpeeds")
-const { calculateDistance } = require("../utils/distance")
+//const { calculateDistance } = require("../utils/distance")
 
 
 function testing(req, res) {
@@ -35,62 +35,73 @@ const get = async(req, res) => {
 
 const store = async(req, res) => {
 
-    const { readings } = req.body;
+    try {
 
-    if (readings.length < 5) {
-        res.status(400).json({ message: 'Se requieren al menos 5 lecturas para construir un viaje.' });
-        return;
+        const { readings } = req.body;
+
+        if (readings.length < 5) {
+            return res.status(400).json({ message: 'Se requieren al menos 5 lecturas para construir un viaje.' });
+        }
+
+        if (readings.some(reading => !reading.time)) {
+            return res.status(400).json({ message: 'Todas las lecturas deben tener la propiedad time.' });
+        }
+
+        readings.sort((a, b) => a.time - b.time);
+
+        const startReading = readings[0];
+        const endReading = readings[readings.length - 1];
+
+        const startLat = startReading.location.lat;
+        const startLon = startReading.location.lon;
+
+        const endLat = endReading.location.lat;
+        const endLon = endReading.location.lon;
+
+        const startAddress = await getAddress(startLat, startLon);
+        const endAddress = await getAddress(endLat, endLon);
+
+        const duration = endReading.time - startReading.time;
+
+        const distance = readings.reduce((total, reading, index) => {
+            if (index === 0) return total;
+
+            const prevReading = readings[index - 1];
+            const timeDiff = reading.time - prevReading.time;
+            const speed = prevReading.speed;
+            const distance = speed * timeDiff / 3600; // Convert from seconds to hours
+            return total + distance;
+        }, 0);
+
+        const overspeedsCount = calculateOverspeedsCount(readings);
+        const boundingBox = calculateBoundingBox(readings);
+
+        const trip = new Trip({
+            start: {
+                time: startReading.time,
+                lat: startLat,
+                lon: startLon,
+                address: startAddress
+            },
+            end: {
+                time: endReading.time,
+                lat: endLat,
+                lon: endLon,
+                address: endAddress
+            },
+            duration,
+            distance,
+            overspeedsCount,
+            boundingBox
+        });
+
+        await trip.save();
+        res.status(201).json(trip);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
     }
-
-    if (readings.some(reading => !reading.time)) {
-        res.status(400).json({ message: 'Todas las lecturas deben tener la propiedad time.' });
-        return;
-    }
-
-    readings.sort((a, b) => a.time - b.time);
-
-    const startReading = readings[0];
-    const endReading = readings[readings.length - 1];
-
-    const startLat = startReading.location.lat;
-    const startLon = startReading.location.lon;
-
-    const endLat = endReading.location.lat;
-    const endLon = endReading.location.lon;
-
-    const startAddress = await getAddress(startLat, startLon);
-    const endAddress = await getAddress(endLat, endLon);
-
-    const duration = endReading.time - startReading.time;
-    const distance = readings.reduce((acc, curr, index) => {
-        if (index === 0) return 0;
-        return acc + calculateDistance(readings[index - 1], curr);
-    }, 0);
-
-    const overspeedsCount = calculateOverspeedsCount(readings);
-    const boundingBox = calculateBoundingBox(readings);
-
-    const trip = new Trip({
-        start: {
-            time: startReading.time,
-            lat: startLat,
-            lon: startLon,
-            address: startAddress
-        },
-        end: {
-            time: endReading.time,
-            lat: endLat,
-            lon: endLon,
-            address: endAddress
-        },
-        duration,
-        distance,
-        overspeedsCount,
-        boundingBox
-    });
-
-    await trip.save();
-    res.status(201).json(trip);
 }
 
 
