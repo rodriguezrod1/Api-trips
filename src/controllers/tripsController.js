@@ -25,10 +25,10 @@ const get = async(req, res) => {
 
     try {
         const trips = await query.exec();
-        return res.json(trips);
+        res.status(200).json(trips);
     } catch (error) {
         console.error('Error fetching trips:', error);
-        return res.status(500).json({ message: 'Error fetching trips' });
+        res.status(500).json({ message: 'Error fetching trips' });
     }
 }
 

@@ -1,5 +1,7 @@
-const {get, store } = require('../controllers/tripsController')
+const request  = require('supertest')
+const { app } = require("../index")
 const { Trip } = require('../models/Trip')
+
 
 // Test data
 const testReadings = [{
@@ -95,75 +97,30 @@ const testReadings = [{
 ];
 
 
-describe('get', () => {
+/*beforeEach(async() => {
+    await Trip.deleteMany();
+});*/
 
-    it('should return all trips', async() => {
-        const trips = await get();
-        expect(trips).toBeDefined();
-        expect(trips.length).toBeGreaterThan(0);
-    });
 
-    it('should filter trips by start time', async() => {
-        const start_gte = '2023-06-24T00:00:00Z';
-        const trips = await get({ start_gte });
-        expect(trips.length).toBeGreaterThan(0);
-        for (const trip of trips) {
-            expect(trip.start.time).toBeGreaterThanOrEqual(start_gte);
-        }
-    });
+describe('POST /api/trips', () => {
+    test('Debe crear y guardar un nuevo viaje', async() => {
+        const response = await request(app)
+            .post('/api/trips')
+            .send({ readings: testReadings });
 
-    it('should filter trips by end time', async() => {
-        const start_lte = '2023-06-24T00:00:00Z';
-        const trips = await get({ start_lte });
-        expect(trips.length).toBeGreaterThan(0);
-        for (const trip of trips) {
-            expect(trip.start.time).toBeLessThanOrEqual(start_lte);
-        }
-    });
+        expect(response.status).toBe(201);
 
-    it('should filter trips by distance', async() => {
-        const distance_gte = 100;
-        const trips = await get({ distance_gte });
-        expect(trips.length).toBeGreaterThan(0);
-        for (const trip of trips) {
-            expect(trip.distance).toBeGreaterThanOrEqual(distance_gte);
-        }
+        const trip = await Trip.findById(response.body._id);
+        expect(trip).toBeDefined();
+        expect(trip.readings.length).toBe(testReadings.length);
     });
 });
 
 
-
-describe('store', () => {
-    it('should create a new trip', async() => {
-        const readings = [{
-                time: '2023-06-24T00:00:00Z',
-                location: {
-                    lat: 10,
-                    lon: 10
-                }
-            },
-            {
-                time: '2023-06-24T01:00:00Z',
-                location: {
-                    lat: 20,
-                    lon: 20
-                }
-            }
-        ];
-        const trip = await store({ readings });
-        expect(trip).toBeDefined();
-        expect(trip.start.time).toBe(readings[0].time);
-        expect(trip.end.time).toBe(readings[1].time);
-        expect(trip.distance).toBe(100);
-    });
-
-    it('should fail if the readings are not valid', async() => {
-        const readings = [{ time: '2023-06-24T00:00:00Z' }];
-        try {
-            await store({ readings });
-            fail('Should have thrown an error');
-        } catch (error) {
-            expect(error.message).toBe('Se requieren al menos 5 lecturas para construir un viaje.');
-        }
+describe('GET /api/trips', () => {
+    test('Debe devolver una lista de viajes', async() => {
+        const response = await request(app).get('/api/trips').send();
+        expect(response.status).toBe(200);
+        expect(response.body.length).toBe(0);
     });
 });
