@@ -6,7 +6,7 @@ const getAddress = async(lat, lon) => {
         const response = await axios.get(url);
         return response.data.display_name;
     } catch (error) {
-        console.error('Error fetching address:', error);
+        console.error('Error fetching address:', error.message);
         return null;
     }
 }
